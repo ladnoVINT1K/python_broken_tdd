@@ -1,18 +1,15 @@
-from datetime import datetime
-import os
-
 DEFAULT_LOW_STOCK_THRESHOLD = 10
 
 
 def available_units(stock, sku):
     """Return how many units of `sku` are physically available right now."""
-    if stock.get(sku) == None:
+    if stock.get(sku) is None:
         return 0
     return stock[sku]
 
 
 def reserve_units(
-    stock: dict[str, int], request: dict[str, str], reserved: dict[str, int] = {}
+    stock: dict[str, int], request: dict[str, str], reserved: dict[str, int] = None
 ) -> dict[str, int]:
     """Move units out of `stock` into the `reserved` ledger and return the ledger.
 
