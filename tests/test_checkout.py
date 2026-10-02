@@ -96,7 +96,10 @@ def test_unsupported_city_is_rejected() -> None:
 def test_valid_order_passes_validation() -> None:
     """Spec 3: a good order gets None back instead of a reason."""
     assert validate_order([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) is None
-    assert calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) == 84_000
+    assert (
+        calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")])
+        == 84_000
+    )
 
 
 def test_no_discount_below_first_tier() -> None:
@@ -137,4 +140,7 @@ def test_free_delivery_uses_discounted_subtotal() -> None:
 
 def test_vat_is_charged_on_the_discounted_sum() -> None:
     """Spec 4, steps 8-10: base = discounted subtotal + delivery."""
-    assert calculate_order_total([line(qty="10")], promo_code="SUMMER15", shipping_city="msk") == 124_800
+    assert (
+        calculate_order_total([line(qty="10")], promo_code="SUMMER15", shipping_city="msk")
+        == 124_800
+    )
