@@ -100,6 +100,11 @@ def test_valid_order_passes_validation() -> None:
         calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")])
         == 60_000
     )
+    assert validate_order([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) is None
+    assert (
+        calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")])
+        == 60_000
+    )
 
 
 def test_no_discount_below_first_tier() -> None:
