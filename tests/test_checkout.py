@@ -96,6 +96,8 @@ def test_unsupported_city_is_rejected() -> None:
 def test_valid_order_passes_validation() -> None:
     """Spec 3: a good order gets None back instead of a reason."""
     assert validate_order([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) is None
+    assert calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) == 84_000
+    assert validate_order([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) is None
     assert (
         calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")])
         == 60_000
@@ -125,11 +127,14 @@ def test_tier_discount_at_highest_threshold() -> None:
 def test_promo_code_beats_tier_discount() -> None:
     """Spec 4, steps 3-4: the bigger percentage wins, the two do not add up."""
     assert calculate_order_total([line(qty="10")], promo_code="SUMMER15") == 102_000
+    assert calculate_order_total([line(qty="50")], promo_code="VIP35") == 510_000
+    assert calculate_order_total([line(qty="10")], promo_code="SUMMER15") == 102_000
     assert calculate_order_total([line(qty="50")], promo_code="VIP35") == 420_000
 
 
 def test_discount_is_capped_at_thirty_percent() -> None:
     """Spec 4, step 5: VIP35 gives 35%, but the cap is 30%. Compare with example 4."""
+    assert calculate_order_total([line(qty="50")], promo_code="VIP35") == 525_000
     assert calculate_order_total([line(qty="50")], promo_code="VIP35") == 420_000
 
 
