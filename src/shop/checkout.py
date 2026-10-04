@@ -50,39 +50,6 @@ def _validate_line(line: dict[str, str], index: int, seen_skus: set[str]) -> str
     return None
 
 
-def _validate_line(line: dict[str, str], index: int, seen_skus: set[str]) -> str | None:
-    """Check one order line against the validation rules."""
-    for key in REQUIRED_LINE_KEYS:
-        if key not in line:
-            return f"Line {index} is missing required key '{key}'."
-
-    sku = str(line["sku"])
-    if not sku.strip():
-        return f"Line {index} has an empty sku."
-
-    if sku in seen_skus:
-        return f"Duplicate sku '{sku}' is not allowed."
-    seen_skus.add(sku)
-
-    qty_raw = line["qty"]
-    try:
-        qty = int(qty_raw)
-    except (TypeError, ValueError):
-        return f"Line {index} qty must be an integer."
-    if qty <= 0:
-        return f"Line {index} qty must be greater than zero."
-
-    price_raw = line["unit_price_kopecks"]
-    try:
-        unit_price_kopecks = int(price_raw)
-    except (TypeError, ValueError):
-        return f"Line {index} unit_price_kopecks must be an integer."
-    if unit_price_kopecks < 0:
-        return f"Line {index} unit_price_kopecks must not be negative."
-
-    return None
-
-
 def validate_order(
     lines: list[dict[str, str]],
     promo_code: str = "",
