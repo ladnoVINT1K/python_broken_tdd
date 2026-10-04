@@ -79,7 +79,11 @@ def test_unsupported_city_is_rejected() -> None:
 
 def test_valid_order_passes_validation() -> None:
     """Spec 3: a good order gets None back instead of a reason."""
-    ...
+    assert validate_order([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")]) is None
+    assert (
+        calculate_order_total([line(), line(sku="SKU-2", qty="2", unit_price_kopecks="20000")])
+        == 60_000
+    )
 
 
 def test_no_discount_below_first_tier() -> None:
@@ -99,24 +103,28 @@ def test_tier_discount_at_highest_threshold() -> None:
 
 def test_promo_code_beats_tier_discount() -> None:
     """Spec 4, steps 3-4: the bigger percentage wins, the two do not add up."""
-    ...
+    assert calculate_order_total([line(qty="10")], promo_code="SUMMER15") == 102_000
+    assert calculate_order_total([line(qty="50")], promo_code="VIP35") == 420_000
 
 
 def test_discount_is_capped_at_thirty_percent() -> None:
     """Spec 4, step 5: VIP35 gives 35%, but the cap is 30%. Compare with example 4."""
-    ...
+    assert calculate_order_total([line(qty="50")], promo_code="VIP35") == 420_000
 
 
 def test_delivery_is_charged_for_small_order() -> None:
     """Spec 4, steps 7-10: a city adds SHIPPING_KOPEKS and VAT is charged on it."""
-    ...
+    assert calculate_order_total([line(qty="1")], shipping_city="msk") == 70_800
 
 
 def test_free_delivery_uses_discounted_subtotal() -> None:
     """Spec 4, step 7: the threshold is checked against the sum after the discount."""
-    ...
+    assert calculate_order_total([line(qty="50")], shipping_city="msk") == 568_800
 
 
 def test_vat_is_charged_on_the_discounted_sum() -> None:
     """Spec 4, steps 8-10: base = discounted subtotal + delivery."""
-    ...
+    assert (
+        calculate_order_total([line(qty="10")], promo_code="SUMMER15", shipping_city="msk")
+        == 160_800
+    )
