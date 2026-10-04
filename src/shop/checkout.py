@@ -50,13 +50,45 @@ def _validate_line(line: dict[str, str], index: int, seen_skus: set[str]) -> str
     return None
 
 
+def _validate_line(line: dict[str, str], index: int, seen_skus: set[str]) -> str | None:
+    """Check one order line against the validation rules."""
+    for key in REQUIRED_LINE_KEYS:
+        if key not in line:
+            return f"Line {index} is missing required key '{key}'."
+
+    sku = str(line["sku"])
+    if not sku.strip():
+        return f"Line {index} has an empty sku."
+
+    if sku in seen_skus:
+        return f"Duplicate sku '{sku}' is not allowed."
+    seen_skus.add(sku)
+
+    qty_raw = line["qty"]
+    try:
+        qty = int(qty_raw)
+    except (TypeError, ValueError):
+        return f"Line {index} qty must be an integer."
+    if qty <= 0:
+        return f"Line {index} qty must be greater than zero."
+
+    price_raw = line["unit_price_kopecks"]
+    try:
+        unit_price_kopecks = int(price_raw)
+    except (TypeError, ValueError):
+        return f"Line {index} unit_price_kopecks must be an integer."
+    if unit_price_kopecks < 0:
+        return f"Line {index} unit_price_kopecks must not be negative."
+
+    return None
+
+
 def validate_order(
     lines: list[dict[str, str]],
     promo_code: str = "",
     shipping_city: str = "",
 ) -> str | None:
     """Return a human readable reason why the order is invalid, or None if it is fine."""
-<<<<<<< HEAD
     if not lines:
         return "Order must contain at least one line."
 
@@ -77,11 +109,6 @@ def validate_order(
 
     if normalized_city and normalized_city not in SUPPORTED_CITIES:
         return "Unsupported shipping city."
-=======
-    for line in lines:
-        if int(line["qty"]) <= 0:
-            return "Quantity must be greater than zero."
->>>>>>> d1a1b67 (GREEN)
 
     return None
 
@@ -96,7 +123,6 @@ def calculate_order_total(
     if reason is not None:
         return None
 
-<<<<<<< HEAD
     subtotal = 0
     total_quantity = 0
     for line in lines:
@@ -126,7 +152,3 @@ def calculate_order_total(
     base = discounted_subtotal + delivery
     vat = percent_of(base, VAT_PERCENT)
     return base + vat
-=======
-    subtotal = sum(int(line["qty"]) * int(line["unit_price_kopecks"]) for line in lines)
-    return subtotal + percent_of(subtotal, VAT_PERCENT)
->>>>>>> d1a1b67 (GREEN)
